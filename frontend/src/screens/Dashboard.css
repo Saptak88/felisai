@@ -1,0 +1,63 @@
+.dashboard {
+    height: 100vh;
+    display: flex;
+    width: 100%;
+}
+.dashboard-main {
+    flex: 1;
+    overflow-y: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 70px;
+    height: calc(100vh - 70px);
+}
+.message-container {
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    z-index: 100;
+    overflow: hidden;
+    width: 250px;
+    background-color: #171717;
+    transition: width 0.2s ease;
+    white-space: nowrap;
+}
+.sidebar.openside {
+    width: 0px;
+}
+
+@media (max-width: 575.98px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        height: 100vh;
+    }
+    .sidebar.openside {
+        left: -250px;
+    }
+    .large-display {
+        display: none;
+    }
+}
+.s-top {
+    display: flex;
+    width: 250px;
+    align-items: center;
+    height: 70px;
+}
+.chat-history {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #2f2f2e;
+}
