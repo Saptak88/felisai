@@ -6,7 +6,10 @@ import Message from "../components/Message";
 const Dashboard = ({ sidebarOpen, setSidebarOpen }) => {
     const [messages, setMessages] = useState([
         { text: "Hi there!", sender: "user" },
-        { text: "How are you?", sender: "bot" },
+        {
+            text: "Creating a chatbot chat input component in React involves building an input field.",
+            sender: "bot",
+        },
     ]);
 
     const toggleSidebar = () => {
@@ -16,6 +19,12 @@ const Dashboard = ({ sidebarOpen, setSidebarOpen }) => {
     const messageContainerRef = useRef(null);
 
     const handleSendMessage = (message) => {
+        //clear command
+        if (message.trim().toLowerCase() === "clear") {
+            setMessages((prevMessages) => []);
+            return;
+        }
+
         // Update state using functional form to ensure correct state update
         setMessages((prevMessages) => [...prevMessages, { text: message, sender: "user" }]);
 
@@ -67,7 +76,7 @@ const Dashboard = ({ sidebarOpen, setSidebarOpen }) => {
                     </button>
                 </div>
                 <div>
-                    <p className="fw-medium ms-2 ms-sm-5 mb-1" style={{ color: "#b4b4b4" }}>
+                    <p className="fw-medium ms-2 ms-sm-3 mb-1" style={{ color: "#b4b4b4" }}>
                         Recents
                     </p>
                     <div className="chat-history ms-2 me-2">New chat</div>

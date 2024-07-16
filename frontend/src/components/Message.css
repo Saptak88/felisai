@@ -1,21 +1,44 @@
 /* Message.css */
 
 .message {
-    display: inline-block;
-    max-width: 70%;
+    display: flex;
+    max-width: 100%;
     margin: 10px;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 8px;
 }
-
+.message.bot-message {
+    position: relative;
+    left: -7px;
+}
+.message.user-message {
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 20px;
+}
 .user-message {
-    background-color: #007bff;
-    color: #fff;
+    background-color: #2f2f2f;
+    color: #e3e3e3;
     align-self: flex-end;
 }
 
 .bot-message {
-    background-color: #f5f5f5;
-    color: #333;
+    color: #e3e3e3;
     align-self: flex-start;
+}
+.avatar {
+    position: relative;
+    top: -2px;
+    left: -5px;
+    display: flex;
+    align-items: center;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #494949;
+    justify-content: center;
+}
+.message-p {
+    flex: 1;
+    white-space: pre-wrap; /* This preserves whitespace and line breaks */
 }
