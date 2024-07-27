@@ -57,8 +57,19 @@
 .chat-history {
     display: flex;
     align-items: center;
-    height: 40px;
     border-radius: 5px;
-    padding: 10px;
+    padding: 0;
     background-color: #2f2f2e;
+}
+.session-list {
+    list-style: none;
+    padding: 0;
+}
+.session-list a {
+    text-decoration: none;
+    color: #b4b4b4;
+    overflow: hidden;
+    padding: 2px;
+    padding-left: 10px;
+    font-weight: 500;
 }

@@ -1,15 +1,26 @@
 import "./App.css";
-import Dashboard from "./screens/Dashboard";
-import Header from "./components/Header";
-import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "./slices/authSlice";
+import { useEffect } from "react";
 
 function App() {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const expirationTime = localStorage.getItem("expirationTime");
+        if (expirationTime) {
+            const currentTime = new Date().getTime();
+
+            if (currentTime > expirationTime) {
+                dispatch(logout());
+            }
+        }
+    }, [dispatch]);
 
     return (
         <div className="App">
-            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}></Header>
-            <Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}></Dashboard>
+            <Outlet></Outlet>
         </div>
     );
 }

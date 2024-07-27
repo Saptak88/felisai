@@ -34,7 +34,7 @@ p {
 }
 .navbar {
     display: flex;
-    position: fixed;
+
     top: 0;
     right: 0;
     left: 0;
@@ -72,4 +72,19 @@ p {
 }
 .sidebar-top.openside {
     width: 0px;
+}
+.login-button {
+    display: inline-block;
+    text-decoration: none;
+    padding: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 35px;
+
+    color: #000;
+    font-weight: 500;
+    font-size: medium;
+}
+.border-slim {
+    border: 1px solid hsla(0, 0%, 100%, 0.15);
 }

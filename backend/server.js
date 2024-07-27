@@ -3,9 +3,9 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import { dirname } from "path";
-//import path from "path";
+import path from "path";
 import { fileURLToPath } from "url";
-//const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import userRoutes from "./routes/userRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 
@@ -13,7 +13,7 @@ dotenv.config();
 
 const port = process.env.PORT || 5000;
 
-//connectDB();
+connectDB();
 
 const app = express();
 

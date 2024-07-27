@@ -1,0 +1,47 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+}
+.login-item {
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 992px) {
+    .login-item {
+        width: 80%;
+    }
+    .login-container {
+        align-items: center;
+    }
+}
+.finput {
+    border-radius: 0;
+    padding: 10px;
+    border: 1px solid black;
+    height: 40px;
+}
+.finput:focus {
+    outline-color: #b2b2b2;
+    outline-style: solid; /* Set the style of the outline */
+    outline-width: 2px; /* Set the width of the outline */
+}
+.signin-btn {
+    margin-top: 10px;
+    color: white;
+    background-color: #2d7088;
+    width: fit-content;
+    font-size: large;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border: 1px solid black;
+}
+.signin-btn:hover {
+    color: black;
+    background-color: white;
+    border: 1px solid black;
+}
+.textcol {
+    color: #b4b4b4;
+}
