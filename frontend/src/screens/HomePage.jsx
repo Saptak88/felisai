@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./Login.css";
 import showVideo from "../assets/show.mp4";
+import ss1 from "../assets/ss1.png";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -13,7 +14,7 @@ const Login = () => {
         }
     }, [userInfo, navigate]);
 
-    const text = "Project";
+    const text = "FelisAI";
     const [displayedText, setDisplayedText] = useState("");
     const [index, setIndex] = useState(0);
     const speed = 200;
@@ -28,7 +29,7 @@ const Login = () => {
                     setIsVisible(entry.isIntersecting);
                 });
             },
-            { rootMargin: "300px 0px -5% 0px", threshold: 0 }
+            { rootMargin: "500px 0px -10% 0px", threshold: 0 }
         );
 
         if (targetRef.current) {
@@ -45,12 +46,30 @@ const Login = () => {
                     entry.target.classList.toggle("fade-in", entry.isIntersecting);
                 });
             },
-            { rootMargin: "300px 0px -30% 0px", threshold: 0 }
+            { rootMargin: "500px 0px -30% 0px", threshold: 0 }
         );
 
         cards.forEach((card) => {
             observer2.observe(card);
         });
+
+        //ob3
+        const video = document.getElementById("home-video");
+        const observer3 = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Play the video when it comes into view
+                        video.play();
+                    } else {
+                        // Pause the video when it goes out of view
+                        observer3.unobserve(video);
+                    }
+                });
+            },
+            { threshold: 0.8 }
+        );
+        observer3.observe(video);
     }, []);
 
     //
@@ -82,30 +101,36 @@ const Login = () => {
                 <p className="homepage-text text-animate gradient">{displayedText}</p>
                 {showElement && <p className="cursor text-animate">|</p>}
             </div>
-            <div style={{ height: "200px" }}></div>
+            <div style={{ height: "200px" }} className="pe-sm-5 ps-sm-5 pe-2 ps-2">
+                <p style={{ color: "#bfc3c1" }} className="text-animate mt-2 fs-1">
+                    Your personal AI assistant for everything
+                </p>
+            </div>
             <div className="bgdark pe-sm-5 ps-sm-5 pe-2 ps-2 mb-4">
                 <p ref={targetRef} className={`homepage-text hidden-div ${isVisible ? "fade-in" : ""}`}>
                     Lets take a closer look
                 </p>
                 <div className="row m-0 mt-4  mb-4">
+                    <div className="col-lg-6 col-12  p-2">
+                        <p className="blu-col text-center fw-medium fs-4 pb-2">Accurate</p>
+                        <div className="infox">
+                            <img src={ss1} alt="" class="responsive-image" />
+                        </div>
+                    </div>
                     <div className="col-lg-6 col-12  p-2 ">
                         <p className="blu-col text-center fw-medium fs-4 pb-2">Superfast</p>
                         <div className="infox">
-                            <div className="vdo-cont">
-                                <video autoPlay muted playsInline>
-                                    <source src={showVideo} type="video/mp4" />
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
+                            <video autoPlay muted playsInline id="home-video" className="responsive-image">
+                                <source src={showVideo} type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
-                    </div>
-                    <div className="col-lg-6 col-12  p-2">
-                        <p className="blu-col text-center fw-medium fs-4 pb-2">Accurate</p>
-                        <div className="infox">kalo</div>
                     </div>
                 </div>
             </div>
-            <div style={{ height: "400px" }}>kalo</div>
+            <div style={{ height: "400px" }} className="pe-sm-5 ps-sm-5 pe-2 ps-2">
+                <p className={`homepage-text hidden-div ${isVisible ? "fade-in" : ""}`}>FelisAI Cancer</p>
+            </div>
             <p className="footer text-center mt-2">Copyright © 2024 Project.</p>
         </div>
     );

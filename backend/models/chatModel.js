@@ -6,6 +6,15 @@ const sessionSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        type: {
+            type: String,
+            required: true,
+            default: 0,
+        },
+        name: {
+            type: String,
+            default: "New chat",
+        },
         createdAt: {
             type: Date,
             default: Date.now,

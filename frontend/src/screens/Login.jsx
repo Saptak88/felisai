@@ -43,7 +43,7 @@ function Login() {
                 <div className="navbar-top pe-sm-5 ps-sm-5 pe-2 ps-2">
                     <div className="d-flex align-items-center">
                         <Link to={"/"} className="brand ">
-                            Project
+                            FelisAI
                         </Link>
                     </div>
                 </div>
@@ -52,7 +52,7 @@ function Login() {
                 <div className="col-12 col-lg-6">
                     <div className="login-container">
                         <form onSubmit={handleSubmit} className="login-item">
-                            <p className="fs-4 pb-2 pb-sm-3 textcol">Sign in to Project</p>
+                            <p className="fs-4 pb-2 pb-sm-3 textcol">Sign in to FelisAI</p>
                             <p className="fw-medium mb-1 mb-sm-2 textcol">Email</p>
                             <input
                                 type="email"

@@ -9,7 +9,36 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const groq = new Groq({ apiKey: process.env.ACCESS_TOKEN });
-
+//
+router.post(
+    "/updateSession",
+    asyncHandler(async (req, res) => {
+        const { messages, sessionId } = req.body;
+        const firstMessage = {
+            role: "user",
+            content: `You will just summarize the chat session in a few words strictly reply only the summary without any quotes.`,
+        };
+        messages.push(firstMessage);
+        const chatCompletion = await groq.chat.completions.create({
+            messages: messages,
+            model: "llama3-70b-8192",
+            temperature: 1,
+            max_tokens: 1024,
+            top_p: 1,
+            stream: false,
+            stop: null,
+        });
+        const summary = chatCompletion.choices[0].message.content;
+        const session = await Session.findByIdAndUpdate(
+            sessionId,
+            { name: summary },
+            { new: true } // Return the updated session
+        );
+        //console.log(summary);
+        res.json(session);
+    })
+);
+//
 router.post(
     "/message",
     asyncHandler(async (req, res) => {
@@ -22,7 +51,14 @@ router.post(
 
         const firstMessage = {
             role: "system",
-            content: "You are a Bengali AI assistant and you will answer in Bengali unless you are told otherwise",
+            content: `You are a helpful AI assistant named FelisAI and you will answer in user's language.
+                If you are asked to give program code please provide codes in the following format:
+                \`\`\`language name
+                code
+                \`\`\`
+                P.S: triple backticks and language name should be in same line and together.
+                Provide other responses as normal.
+                `,
         };
         messages.unshift(firstMessage);
 
@@ -73,11 +109,13 @@ router.post(
     "/new",
     protect,
     asyncHandler(async (req, res) => {
+        const type = req.body.type ? 0 : 1;
         const session = new Session({
-            userId: req.user._id || "default_user", // Use a default value or handle userId based on your requirements
+            userId: req.user._id || "default_user",
+            type, // Use a default value or handle userId based on your requirements
         });
         await session.save();
-        res.status(201).json({ sessionId: session._id.toString() });
+        res.status(201).json(session);
     })
 );
 
@@ -102,13 +140,14 @@ router.post(
     })
 );
 
-router.get(
+router.post(
     "/sessions",
     protect, // Apply authentication middleware
     asyncHandler(async (req, res) => {
         try {
-            const userId = req.user._id; // Assuming user ID is available in req.user from auth middleware
-            const sessions = await Session.find({ userId }).sort({ createdAt: -1 });
+            const userId = req.user._id;
+            const type = req.body.type ? 0 : 1;
+            const sessions = await Session.find({ userId, type }).sort({ createdAt: -1 });
             res.json(sessions);
         } catch (error) {
             console.error("Error fetching sessions:", error);

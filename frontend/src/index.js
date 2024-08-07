@@ -41,6 +41,24 @@ const router = createBrowserRouter(
                     </>
                 }
             ></Route>
+            <Route
+                path="/cancer"
+                element={
+                    <>
+                        <Header></Header>
+                        <Dashboard></Dashboard>
+                    </>
+                }
+            ></Route>
+            <Route
+                path="/cancer/:sessionId"
+                element={
+                    <>
+                        <Header></Header>
+                        <Dashboard></Dashboard>
+                    </>
+                }
+            ></Route>
             <Route path="/login" element={<Login></Login>}></Route>
             <Route path="/register" element={<Register></Register>}></Route>
         </Route>

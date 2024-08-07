@@ -1,27 +1,25 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import items from "./listitems.js";
-import users from "./users.js";
-import User from "./models/userModel.js";
-import { dirname } from "path";
-import path from "path";
-import { fileURLToPath } from "url";
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { Session } from "./models/chatModel.js";
+
 import connectDB from "./config/db.js";
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config();
 
 connectDB();
 
-const seedDB = async () => {
+async function addTypeField() {
     try {
-        await User.deleteMany(); // Clear existing users
-        await User.insertMany(users);
-        console.log("Data seeded successfully");
+        // Update all documents to add type: 0 if the type field does not exist
+        await Session.updateMany(
+            { name: { $exists: false } }, // Match documents where type field does not exist
+            { $set: { name: "New chat" } } // Set the type field to 0
+        );
+        console.log("Type field added to all documents");
     } catch (error) {
-        console.error("Error seeding data:", error);
+        console.error("Error updating documents:", error);
     } finally {
         mongoose.connection.close();
     }
-};
+}
 
-seedDB();
+addTypeField();

@@ -4,7 +4,7 @@ import Chatinput from "../components/Chatinput";
 import Message from "../components/Message";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleSidebar } from "../slices/uiSlice";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const Dashboard = () => {
     const { userInfo } = useSelector((state) => state.auth); //userinfo from storage
@@ -16,18 +16,22 @@ const Dashboard = () => {
     const [messages, setMessages] = useState([]);
     const [sessionId, setSessionId] = useState(null);
     const [sessions, setSessions] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+    const ischatRoute = location.pathname === "/c" || location.pathname.startsWith("/c/");
 
     useEffect(() => {
         const fetchSessions = async () => {
             try {
                 const response = await fetch("/api/v1/chat/sessions", {
-                    method: "GET",
+                    method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
+                    body: JSON.stringify({ type: ischatRoute }),
                 });
 
                 if (!response.ok) {
@@ -41,7 +45,7 @@ const Dashboard = () => {
             }
         };
         if (userInfo) fetchSessions();
-    }, [userInfo]);
+    }, [userInfo, ischatRoute]);
 
     /*
     useEffect(() => {
@@ -55,11 +59,20 @@ const Dashboard = () => {
         try {
             const response = await fetch("/api/v1/chat/new", {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ type: ischatRoute }),
             });
             const data = await response.json();
-            const newSessionId = data.sessionId;
+            const newSessionId = data._id;
             setSessionId(newSessionId);
-            navigate(`/c/${newSessionId}`, { replace: true });
+            setSessions((prevSessions) => [data, ...prevSessions]);
+            if (ischatRoute) {
+                navigate(`/c/${newSessionId}`, { replace: true });
+            } else {
+                navigate(`/cancer/${newSessionId}`, { replace: true });
+            }
             return newSessionId; // Use navigate to redirect
         } catch (error) {
             console.error("Error creating new session:", error);
@@ -104,8 +117,6 @@ const Dashboard = () => {
     };
 
     const sendMessage = async (message, curr) => {
-        //user scroll ref
-
         userScrollingRef.current = false;
 
         //clear command
@@ -131,6 +142,8 @@ const Dashboard = () => {
 
         let done = false;
         //  let currentMessage = "";
+        let currentAssistantMessage = { content: "", role: "assistant" };
+        setIsLoading(true);
         setMessages((prevMessages) => [...prevMessages, { content: "", role: "assistant" }]);
         while (!done) {
             const { value, done: streamDone } = await reader.read();
@@ -138,6 +151,7 @@ const Dashboard = () => {
 
             if (value) {
                 const chunk = decoder.decode(value, { stream: true });
+                currentAssistantMessage.content += chunk;
                 // currentMessage += chunk;
                 // setMessages((prevMessages) => [...prevMessages, { content: chunk, role: "assistant" }]);
                 setMessages((prevMessages) => {
@@ -148,6 +162,34 @@ const Dashboard = () => {
                 });
             }
         }
+        updatedMessages.push(currentAssistantMessage);
+        //session name
+        if (curr && (updatedMessages.length - 2) % 4 === 0) {
+            fetch("/api/v1/chat/updateSession", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ messages: updatedMessages, sessionId: curr }),
+            })
+                .then((response2) => {
+                    if (!response2.ok) {
+                        throw new Error("Failed to update session");
+                    }
+                    return response2.json();
+                })
+                .then((updatedSession) => {
+                    // Assuming the response includes the updated session
+                    setSessions((prevSessions) =>
+                        prevSessions.map((session) => (session._id === updatedSession._id ? updatedSession : session))
+                    );
+                })
+                .catch((error) => {
+                    console.error("Error updating session:", error);
+                });
+        }
+        setIsLoading(false);
+        //
     };
     //pms
 
@@ -185,24 +227,50 @@ const Dashboard = () => {
 
     const formatDateTime = (timestamp) => {
         const date = new Date(timestamp);
-
-        // Get date and time components
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, "0");
         const hours = String(date.getHours()).padStart(2, "0");
         const minutes = String(date.getMinutes()).padStart(2, "0");
 
         // Format as "YYYY-MM-DD HH:MM:SS"
-        return `${year}-${month}-${day} ${hours}:${minutes}`;
+        return `${hours}:${minutes}`;
+    };
+    //try group
+    const formatDate = (dateString) => {
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+    const groupSessionsByDate = (sessions) => {
+        return sessions.reduce((groups, session) => {
+            const date = formatDate(session.createdAt);
+            if (!groups[date]) {
+                groups[date] = [];
+            }
+            groups[date].push(session);
+            return groups;
+        }, {});
+    };
+
+    const isToday = (dateString) => {
+        const today = new Date();
+        const date = new Date(dateString);
+        return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+    };
+
+    const isYesterday = (dateString) => {
+        const today = new Date();
+        const date = new Date(dateString);
+        today.setDate(today.getDate() - 1);
+        return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+    };
+
+    const groupedSessions = groupSessionsByDate(sessions);
+    //
     return (
         <div className="dashboard">
             {userInfo && (
                 <div className={`sidebar ${sidebarOpen ? "openside" : ""}`}>
-                    <div className="s-top">
-                        <button className={`me-2 ms-sm-5 ms-2 border-none bg-transparent `} onClick={() => dispatch(toggleSidebar())}>
+                    <div className="s-top ">
+                        <button className={`ms-3 border-none bg-transparent `} onClick={() => dispatch(toggleSidebar())}>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -219,7 +287,7 @@ const Dashboard = () => {
                                 ></path>
                             </svg>
                         </button>
-                        <a href="/c" className="bg-transparent border-none me-2 ">
+                        <a href="/c" className="bg-transparent border-none me-3 ">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -232,30 +300,71 @@ const Dashboard = () => {
                             </svg>
                         </a>
                     </div>
-                    <div>
-                        <p className="fw-medium ms-2 ms-sm-3 mb-1" style={{ color: "#b4b4b4" }}>
+                    <div className="model-s flex-column small-display">
+                        <ul className=" mb-1 model-list">
+                            <li className="fw-medium ms-2 ms-sm-3 text-light">Model</li>
+                            <li>
+                                <a href="/c" className={`chat-history ms-2 fs-5 mb-1 me-2 ${ischatRoute ? "bg-secondary" : ""}`}>
+                                    FelisAI
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/cancer" className={`chat-history ms-2 fs-5 mb-1 me-2 ${!ischatRoute ? "bg-secondary" : ""}`}>
+                                    FelisAI Cancer
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/*<p className="fw-medium ms-2 ms-sm-3 mb-1" style={{ color: "#b4b4b4" }}>
                             Recents
-                        </p>
-                        <ul className="session-list">
-                            {/*<div className="chat-history ms-2 me-2">New chat</div>*/}
-                            {sessions.map((session) => (
+                        </p>*/}
+                    <ul className="session-list">
+                        {/*<div className="chat-history ms-2 me-2">New chat</div>*/}
+                        {Object.keys(groupedSessions).map((date) => (
+                            <React.Fragment key={date}>
+                                <li className="fw-medium ms-2 ms-sm-3 mb-1 text-light" style={{ color: "#b4b4b4" }}>
+                                    {isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : date}
+                                </li>
+                                {groupedSessions[date].map((session) => (
+                                    <li key={session._id}>
+                                        <a
+                                            href={ischatRoute ? `/c/${session._id}` : `/cancer/${session._id}`}
+                                            className="chat-history ms-2 me-2 mb-1"
+                                            style={sessionId === session._id ? { backgroundColor: "#3b3b3b" } : null}
+                                        >
+                                            <div className="ohid">{session.name || formatDateTime(session.createdAt)}</div>
+                                        </a>
+                                    </li>
+                                ))}
+                            </React.Fragment>
+                        ))}
+                        {/*sessions.map((session) => (
                                 <li key={session._id}>
-                                    <a href={`/c/${session._id}`} className="chat-history ms-2 me-2 mb-1">
+                                    <a
+                                        href={ischatRoute ? `/c/${session._id}` : `/cancer/${session._id}`}
+                                        className="chat-history ms-2 me-2 mb-1"
+                                    >
                                         {session.name || formatDateTime(session.createdAt)}
                                     </a>
                                 </li>
-                            ))}
-                        </ul>
-                    </div>
+                            ))*/}
+                    </ul>
                 </div>
             )}
             <div className="dashboard-main">
                 <div ref={messageContainerRef} className="message-container  pe-sm-5 ps-sm-5 pe-2 ps-2">
                     {messages.map((message, index) => (
-                        <Message key={index} Message text={message.content} sender={message.role} />
+                        <Message
+                            key={index}
+                            isLoading={isLoading && index === messages.length - 1}
+                            Message
+                            text={message.content}
+                            sender={message.role}
+                        />
                     ))}
                 </div>
-                <Chatinput onSendMessage={handleSendMessage}></Chatinput>
+                <Chatinput onSendMessage={handleSendMessage} isLoading={isLoading}></Chatinput>
             </div>
         </div>
     );

@@ -92,12 +92,18 @@
 .infox {
     display: flex;
     justify-content: center;
-    height: 400px;
+    max-height: 400px;
     width: 100%;
 }
 .vdo-cont {
-    display: flex;
-    height: 100%;
     overflow: hidden;
+    display: block;
     border-radius: 10px;
+}
+.responsive-image {
+    max-height: 400px;
+    max-width: 100%;
+    width: auto;
+    border-radius: 10px;
+    /* Ensures the image fits within the container */
 }
