@@ -6,9 +6,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { toggleSidebar } from "../slices/uiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 
-const Dashboard = () => {
+const Dashboard2 = () => {
     const { userInfo } = useSelector((state) => state.auth); //userinfo from storage
-    let { sessionId: sessionIdParam } = useParams(); // Get the sesionId from the URL parameters
+    const { sessionId: sessionIdParam } = useParams(); // Get the sesionId from the URL parameters
     const sidebarOpen = useSelector((state) => state.ui.sidebarOpen);
     const messageContainerRef = useRef(null);
     const userScrollingRef = useRef(false);
@@ -29,7 +29,7 @@ const Dashboard = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ type: 1 }),
+                    body: JSON.stringify({ type: 0 }),
                 });
 
                 if (!response.ok) {
@@ -89,18 +89,19 @@ const Dashboard = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ type: 1 }),
+                body: JSON.stringify({ type: 0 }),
             });
             const data = await response.json();
             const newSessionId = data._id;
             setSessionId(newSessionId);
             setSessions((prevSessions) => [data, ...prevSessions]);
-            navigate(`/c/${newSessionId}`, { replace: true });
+            navigate(`/cancer/${newSessionId}`, { replace: true });
             return newSessionId; // Use navigate to redirect
         } catch (error) {
             console.error("Error creating new session:", error);
         }
     };
+    //
     useEffect(() => {
         if (sessionIdParam) {
             // Fetch chat history for the existing session
@@ -123,7 +124,7 @@ const Dashboard = () => {
 
             fetchChatHistory();
         }
-    }, []);
+    }, []); //
 
     const handleSendMessage = async (message) => {
         if (!sessionId && userInfo) {
@@ -151,12 +152,12 @@ const Dashboard = () => {
         // Update state using functional form to ensure correct state update
         const updatedMessages = [...messages, { content: message, role: "user" }];
         setMessages(updatedMessages);
-        const response = await fetch("/api/v1/chat/message", {
+        const response = await fetch("/api/v1/chat/cancer", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ messages: updatedMessages, sessionId: curr }),
+            body: JSON.stringify({ message: { content: message, role: "user" }, sessionId: curr }),
         });
 
         const reader = response.body.getReader();
@@ -173,6 +174,7 @@ const Dashboard = () => {
 
             if (value) {
                 const chunk = decoder.decode(value, { stream: true });
+                console.log(chunk);
                 currentAssistantMessage.content += chunk;
                 // currentMessage += chunk;
                 // setMessages((prevMessages) => [...prevMessages, { content: chunk, role: "assistant" }]);
@@ -310,7 +312,7 @@ const Dashboard = () => {
                                 ></path>
                             </svg>
                         </button>
-                        <a href="/c" className="bg-transparent border-none me-3 ">
+                        <a href="/cancer" className="bg-transparent border-none me-3 ">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -352,7 +354,7 @@ const Dashboard = () => {
                                 {groupedSessions[date].map((session) => (
                                     <li key={session._id}>
                                         <a
-                                            href={`/c/${session._id}`}
+                                            href={`/cancer/${session._id}`}
                                             className="chat-history ms-2 me-2 mb-1"
                                             style={sessionId === session._id ? { backgroundColor: "#3b3b3b" } : null}
                                         >
@@ -393,4 +395,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default Dashboard2;

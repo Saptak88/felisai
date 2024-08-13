@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import Dashboard from "./screens/Dashboard";
+import Dashboard2 from "./screens/Dashboard2";
 import Header from "./components/Header";
 import HomePage from "./screens/HomePage";
 import Login from "./screens/Login";
@@ -33,6 +34,15 @@ const router = createBrowserRouter(
                 }
             ></Route>
             <Route
+                path="/cancer/:sessionId"
+                element={
+                    <>
+                        <Header></Header>
+                        <Dashboard2></Dashboard2>
+                    </>
+                }
+            ></Route>
+            <Route
                 path="/c"
                 element={
                     <>
@@ -46,16 +56,7 @@ const router = createBrowserRouter(
                 element={
                     <>
                         <Header></Header>
-                        <Dashboard></Dashboard>
-                    </>
-                }
-            ></Route>
-            <Route
-                path="/cancer/:sessionId"
-                element={
-                    <>
-                        <Header></Header>
-                        <Dashboard></Dashboard>
+                        <Dashboard2></Dashboard2>
                     </>
                 }
             ></Route>

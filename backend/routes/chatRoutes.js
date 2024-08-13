@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 const router = express.Router();
 import { Session, ChatMessage } from "../models/chatModel.js";
@@ -79,7 +79,7 @@ router.post(
 
         const chatCompletion = await groq.chat.completions.create({
             messages: messages,
-            model: "llama3-70b-8192",
+            model: "llama-3.1-70b-versatile",
             temperature: 1,
             max_tokens: 1024,
             top_p: 1,
@@ -104,7 +104,88 @@ router.post(
         }
     })
 );
+//cancer
+router.post(
+    "/cancer",
+    asyncHandler(async (req, res) => {
+        const { message, sessionId } = req.body;
 
+        // Validate messages
+        if (message.length === 0) {
+            return res.status(400).json({ error: "Invalid messages" });
+        }
+        //
+        const query = message.content;
+        const response = await fetch("https://rag-2-7wbz.onrender.com/search", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query }), // Send the query in the body
+        });
+        const responseData = await response.json();
+        const context = responseData.context;
+        //
+
+        const lastMessage = message;
+        if (sessionId) {
+            const chatMessage = new ChatMessage({
+                sessionId,
+                content: lastMessage.content,
+                role: lastMessage.role,
+            });
+
+            await chatMessage.save();
+        }
+
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-transform");
+        res.setHeader("Connection", "keep-alive");
+
+        const newMessage = `INSTRUCTIONS:
+You are FelisAI Cancer, a knowledgeable assistant specializing in cancer-related questions. Please respond in the language of the user's query, providing clear and friendly answers. Use relevant instances from the Document text if necessary to support your response.
+
+DOCUMENT:
+${context}
+
+QUESTION:
+${query}
+`;
+
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "user",
+                    content: newMessage,
+                },
+            ],
+            model: "llama3-8b-8192",
+            temperature: 1,
+            max_tokens: 1024,
+            top_p: 1,
+            stream: true,
+            stop: null,
+        });
+        let accumulatedContent = "";
+        for await (const chunk of chatCompletion) {
+            const data = chunk.choices[0]?.delta?.content || "";
+            accumulatedContent += data;
+            res.write(`${data}`);
+        }
+        res.end();
+        //console.log(accumulatedContent);
+        if (sessionId) {
+            const chatMessage = new ChatMessage({
+                sessionId,
+                content: accumulatedContent,
+                role: "assistant",
+            });
+
+            await chatMessage.save();
+        }
+    })
+);
+//cancer end
 router.post(
     "/new",
     protect,
