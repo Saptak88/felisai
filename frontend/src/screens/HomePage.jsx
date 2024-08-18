@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import "./Login.css";
 import showVideo from "../assets/show.mp4";
 import ss1 from "../assets/ss1.png";
+import ss2 from "../assets/ss2.png";
+import ss3 from "../assets/ss3.png";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -106,7 +108,7 @@ const Login = () => {
                     Your personal AI assistant for everything
                 </p>
             </div>
-            <div className="bgdark pe-sm-5 ps-sm-5 pe-2 ps-2 mb-4">
+            <div className="bgdark pe-sm-5 ps-sm-5 pe-2 ps-2">
                 <p ref={targetRef} className={`homepage-text hidden-div ${isVisible ? "fade-in" : ""}`}>
                     Lets take a closer look
                 </p>
@@ -118,7 +120,7 @@ const Login = () => {
                         </div>
                     </div>
                     <div className="col-lg-6 col-12  p-2 ">
-                        <p className="blu-col text-center fw-medium fs-4 pb-2">Superfast</p>
+                        <p className="blu-col text-center fw-medium fs-4 pb-2">Fast</p>
                         <div className="infox">
                             <video autoPlay muted playsInline id="home-video" className="responsive-image">
                                 <source src={showVideo} type="video/mp4" />
@@ -128,10 +130,30 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-            <div style={{ height: "400px" }} className="pe-sm-5 ps-sm-5 pe-2 ps-2">
-                <p className={`homepage-text hidden-div ${isVisible ? "fade-in" : ""}`}>FelisAI Cancer</p>
+            <div style={{ paddingTop: "100px", backgroundColor: "rgb(23, 23, 23)" }} className=" pe-sm-5 ps-sm-5 pe-2 ps-2 pb-2">
+                <p className={`homepage-text`}>FelisAI Cancer</p>
+                <p style={{ color: "#bfc3c1" }} className="fw-medium mt-4 fs-4 pb-2">
+                    Discover FelisAI Cancer: Your Source for Accurate Cancer Information
+                </p>
+                <div className=" row m-0 p-0">
+                    <div className="col-lg-6 col-12  p-2">
+                        <div className="infox">
+                            <img src={ss2} alt="" class="responsive-image" />
+                        </div>
+                    </div>
+                    <div className="col-lg-6 col-12  p-2">
+                        <div className="infox ">
+                            <img src={ss3} alt="" class="responsive-image" />
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-4 mb-4 d-flex justify-content-center">
+                    <a href="/cancer" style={{ color: "#bfc3c1", textDecoration: "none" }} className="fw-medium fs-4">
+                        Try FelisAI Cancer Now
+                    </a>
+                </div>
             </div>
-            <p className="footer text-center mt-2">Copyright © 2024 Project.</p>
+            <p className="footer text-center ">Copyright © 2024 Project.</p>
         </div>
     );
 };
