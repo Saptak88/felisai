@@ -101,7 +101,6 @@ const Dashboard2 = () => {
             console.error("Error creating new session:", error);
         }
     };
-    //
     useEffect(() => {
         if (sessionIdParam) {
             // Fetch chat history for the existing session
@@ -157,7 +156,7 @@ const Dashboard2 = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ message: { content: message, role: "user" }, sessionId: curr }),
+            body: JSON.stringify({ messages: updatedMessages, sessionId: curr }),
         });
 
         const reader = response.body.getReader();
@@ -174,7 +173,6 @@ const Dashboard2 = () => {
 
             if (value) {
                 const chunk = decoder.decode(value, { stream: true });
-                console.log(chunk);
                 currentAssistantMessage.content += chunk;
                 // currentMessage += chunk;
                 // setMessages((prevMessages) => [...prevMessages, { content: chunk, role: "assistant" }]);

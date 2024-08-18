@@ -108,15 +108,15 @@ router.post(
 router.post(
     "/cancer",
     asyncHandler(async (req, res) => {
-        const { message, sessionId } = req.body;
+        const { messages, sessionId } = req.body;
 
         // Validate messages
-        if (message.length === 0) {
+        if (!Array.isArray(messages) || messages.length === 0) {
             return res.status(400).json({ error: "Invalid messages" });
         }
         //
-        const query = message.content;
-        const response = await fetch("https://rag-2-7wbz.onrender.com/search", {
+        const query = messages[messages.length - 1].content;
+        const response = await fetch("https://rag-2.vercel.app/search", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -127,7 +127,7 @@ router.post(
         const context = responseData.context;
         //
 
-        const lastMessage = message;
+        const lastMessage = messages[messages.length - 1];
         if (sessionId) {
             const chatMessage = new ChatMessage({
                 sessionId,
@@ -142,7 +142,7 @@ router.post(
         res.setHeader("Cache-Control", "no-transform");
         res.setHeader("Connection", "keep-alive");
 
-        const newMessage = `INSTRUCTIONS:
+        /*      const newMessage = `INSTRUCTIONS:
 You are FelisAI Cancer, a knowledgeable assistant specializing in cancer-related questions. Please respond in the language of the user's query, providing clear and friendly answers. Use relevant instances from the Document text if necessary to support your response.
 
 DOCUMENT:
@@ -150,17 +150,19 @@ ${context}
 
 QUESTION:
 ${query}
-`;
+`;*/
+        const firstMessage = {
+            role: "system",
+            content: `You are FelisAI Cancer, a knowledgeable assistant specializing in cancer-related questions. Please respond in the language of the user's query, providing clear and friendly answers. Use relevant instances from the Document text if necessary to support your response.
 
+DOCUMENT:
+${context}`,
+        };
+        messages.unshift(firstMessage);
         const chatCompletion = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "user",
-                    content: newMessage,
-                },
-            ],
-            model: "llama3-8b-8192",
-            temperature: 1,
+            messages,
+            model: "llama-3.1-70b-versatile",
+            temperature: 0.6,
             max_tokens: 1024,
             top_p: 1,
             stream: true,
