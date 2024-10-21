@@ -387,7 +387,7 @@ const Dashboard = () => {
                         />
                     ))}
                 </div>
-                <Chatinput onSendMessage={handleSendMessage} isLoading={isLoading}></Chatinput>
+                <Chatinput onSendMessage={handleSendMessage} isLoading={isLoading} modelType={1}></Chatinput>
             </div>
         </div>
     );

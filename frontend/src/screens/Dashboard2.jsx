@@ -327,12 +327,12 @@ const Dashboard2 = () => {
                         <ul className=" mb-1 model-list">
                             <li className="fw-medium ms-2 ms-sm-3 text-light">Model</li>
                             <li>
-                                <a href="/c" className={`chat-history ms-2 fs-5 mb-1 me-2 bg-secondary`}>
+                                <a href="/c" className={`chat-history ms-2 fs-5 mb-1 me-2 `}>
                                     FelisAI
                                 </a>
                             </li>
                             <li>
-                                <a href="/cancer" className={`chat-history ms-2 fs-5 mb-1 me-2 `}>
+                                <a href="/cancer" className={`chat-history ms-2 fs-5 mb-1 me-2 bg-secondary`}>
                                     FelisAI Cancer
                                 </a>
                             </li>
@@ -387,7 +387,7 @@ const Dashboard2 = () => {
                         />
                     ))}
                 </div>
-                <Chatinput onSendMessage={handleSendMessage} isLoading={isLoading}></Chatinput>
+                <Chatinput onSendMessage={handleSendMessage} isLoading={isLoading} modelType={0}></Chatinput>
             </div>
         </div>
     );

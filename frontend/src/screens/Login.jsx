@@ -69,7 +69,7 @@ function Login() {
                                 name="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="I love black cats"
+                                placeholder="example"
                                 required
                                 className="finput  mb-1 mb-sm-3"
                             />

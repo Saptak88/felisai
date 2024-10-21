@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Chatinput.css";
 
-const Chatinput = ({ onSendMessage, isLoading }) => {
+const Chatinput = ({ onSendMessage, isLoading, modelType }) => {
     const [message, setMessage] = useState("");
     const textAreaRef = useRef(null);
 
@@ -39,7 +39,7 @@ const Chatinput = ({ onSendMessage, isLoading }) => {
                 value={message}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyPress}
-                placeholder="Message FelisAI"
+                placeholder={modelType ? "Message FelisAI" : "Message FelisAI Cancer"}
             />
             <button onClick={handleSendMessage} className={`sendbutton ${message !== "" || isLoading ? "bg-light" : "disabled"}`}>
                 {!isLoading && (
