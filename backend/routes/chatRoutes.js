@@ -5,10 +5,37 @@ import { Session, ChatMessage } from "../models/chatModel.js";
 import { protect } from "../middleware/authMiddleware.js";
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
+import multer from "multer";
+import fs from "fs";
 
 dotenv.config();
 
+const upload = multer({ dest: "uploads/" });
+//
+//
 const groq = new Groq({ apiKey: process.env.ACCESS_TOKEN });
+//trnscribe
+router.post(
+    "/transcribe",
+    upload.single("audio"),
+    asyncHandler(async (req, res) => {
+        const audioFilePath = req.file.path;
+        const newFilePath = `${audioFilePath}.webm`;
+        fs.renameSync(audioFilePath, newFilePath);
+        // console.log(newFilePath);
+        const transcription = await groq.audio.transcriptions.create({
+            file: fs.createReadStream(newFilePath),
+            model: "whisper-large-v3",
+            language: "en",
+            // prompt: "if nothing is said give empty response",
+            response_format: "verbose_json",
+        });
+
+        fs.unlinkSync(newFilePath); // Delete temp file
+        // console.log(transcription.text);
+        res.json({ text: transcription.text });
+    })
+);
 //
 router.post(
     "/updateSession",
@@ -21,9 +48,9 @@ router.post(
         messages.push(firstMessage);
         const chatCompletion = await groq.chat.completions.create({
             messages: messages,
-            model: "llama3-70b-8192",
+            model: "llama-3.1-8b-instant",
             temperature: 1,
-            max_tokens: 1024,
+            max_completion_tokens: 1024,
             top_p: 1,
             stream: false,
             stop: null,
@@ -79,9 +106,9 @@ router.post(
 
         const chatCompletion = await groq.chat.completions.create({
             messages: messages,
-            model: "llama-3.1-70b-versatile",
+            model: "llama-3.3-70b-versatile",
             temperature: 1,
-            max_tokens: 1024,
+            max_completion_tokens: 1024,
             top_p: 1,
             stream: true,
             stop: null,
@@ -161,9 +188,9 @@ ${context}`,
         messages.unshift(firstMessage);
         const chatCompletion = await groq.chat.completions.create({
             messages,
-            model: "llama-3.1-70b-versatile",
-            temperature: 0.6,
-            max_tokens: 1024,
+            model: "llama-3.3-70b-versatile",
+            temperature: 1,
+            max_completion_tokens: 1024,
             top_p: 1,
             stream: true,
             stop: null,

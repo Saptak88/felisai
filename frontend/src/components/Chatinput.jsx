@@ -4,6 +4,46 @@ import "./Chatinput.css";
 const Chatinput = ({ onSendMessage, isLoading, modelType }) => {
     const [message, setMessage] = useState("");
     const textAreaRef = useRef(null);
+    //audio
+    const [recording, setRecording] = useState(false);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const startRecording = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorderRef.current = new MediaRecorder(stream);
+        mediaRecorderRef.current.ondataavailable = (event) => {
+            audioChunksRef.current.push(event.data);
+        };
+        mediaRecorderRef.current.onstop = sendAudioToBackend;
+        audioChunksRef.current = [];
+        mediaRecorderRef.current.start();
+        setRecording(true);
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setRecording(false);
+        }
+    };
+    const sendAudioToBackend = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", audioBlob, "recording.webm");
+
+        try {
+            const response = await fetch("/api/v1/chat/transcribe", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            setMessage(data.text);
+        } catch (error) {
+            console.error("Error sending audio:", error);
+        }
+    };
+    //audio
 
     //
     useEffect(() => {
@@ -53,6 +93,26 @@ const Chatinput = ({ onSendMessage, isLoading, modelType }) => {
                     </svg>
                 )}
                 {isLoading && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" class="icon-lg">
+                        <rect width="10" height="10" x="7" y="7" fill="#2f2f2f" rx="1.25"></rect>
+                    </svg>
+                )}
+            </button>
+            <button onClick={recording ? stopRecording : startRecording} className={`sendbutton ms-1 bg-light`}>
+                {!recording && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        fill="#2f2f2f"
+                        class="bi bi-mic-fill"
+                        viewBox="-4 1 24 13"
+                    >
+                        <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" />
+                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
+                    </svg>
+                )}
+                {recording && (
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" class="icon-lg">
                         <rect width="10" height="10" x="7" y="7" fill="#2f2f2f" rx="1.25"></rect>
                     </svg>
