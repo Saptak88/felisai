@@ -17,6 +17,7 @@ const AskFromPdf = () => {
     const [sessionId, setSessionId] = useState(null);
     const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [fileUpLoading, setfileUpLoading] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -243,6 +244,7 @@ const AskFromPdf = () => {
             document.getElementById("file-input").click();
         } else {
             // Upload the file
+            setfileUpLoading(true);
             const formData = new FormData();
             formData.append("pdf", file);
             if (!sessionId && userInfo) {
@@ -273,6 +275,7 @@ const AskFromPdf = () => {
                 console.error("Upload error:", err);
                 alert("An error occurred during upload.");
             }
+            setfileUpLoading(false);
         }
     };
     //file
@@ -370,7 +373,14 @@ const AskFromPdf = () => {
                     <input type="file" accept=".pdf" style={{ display: "none" }} onChange={handleFileChange} id="file-input" />
 
                     <button onClick={handleButtonClick} className="upload-btn">
-                        {file ? "Upload" : "Select PDF"}
+                        {}
+                        {fileUpLoading ? (
+                            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        ) : file ? (
+                            "Upload"
+                        ) : (
+                            "Select PDF"
+                        )}
                     </button>
                 </div>
                 <div ref={messageContainerRef} className="message-container  pe-sm-5 ps-sm-5 pe-2 ps-2">
