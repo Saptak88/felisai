@@ -14,6 +14,7 @@ const Header = () => {
     const location = useLocation();
     const isHomeRoute = location.pathname === "/";
     const ischatRoute = location.pathname === "/c" || location.pathname.startsWith("/c/");
+    const ispdfRoute = location.pathname === "/askfrompdf" || location.pathname.startsWith("/askfrompdf/");
 
     const style = !isHomeRoute ? { position: "fixed" } : {};
 
@@ -79,6 +80,7 @@ const Header = () => {
                             <div className="large-display">FelisAI</div>
                         </Link>
                     )}
+
                     {!isHomeRoute && (
                         <div className="dropdown large-display">
                             <button
@@ -87,7 +89,8 @@ const Header = () => {
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
-                                <div>{ischatRoute ? "FelisAI" : <>FelisAI&nbsp;Cancer</>}</div>
+                                {!ispdfRoute && <div>{ischatRoute ? "FelisAI" : <>FelisAI&nbsp;Cancer</>}</div>}
+                                {ispdfRoute && <div>{<>FelisAI&nbsp;PDF</>}</div>}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="24"
@@ -113,6 +116,11 @@ const Header = () => {
                                 <li>
                                     <a href="/cancer" className="dropdown-item mt-1 ps-1 fw-medium">
                                         FelisAI Cancer
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/askfrompdf" className="dropdown-item mt-1 ps-1 fw-medium">
+                                        FelisAI PDF
                                     </a>
                                 </li>
                             </ul>

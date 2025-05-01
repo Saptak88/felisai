@@ -131,6 +131,39 @@ const Login = () => {
                 </div>
             </div>
             <div style={{ paddingTop: "100px", backgroundColor: "rgb(23, 23, 23)" }} className=" pe-sm-5 ps-sm-5 pe-2 ps-2 pb-2">
+                <p className={`homepage-text`}>FelisAI PDF</p>
+                <p style={{ color: "#bfc3c1" }} className="fw-medium mt-4 fs-4 pb-2">
+                    Ask Anything from Your PDFs with FelisAI PDF
+                </p>
+                <div className=" row m-0 p-0">
+                    <div className="col-lg-6 col-12  p-2">
+                        <div className="fw-medium mt-4 fs-5 pb-2 text-center">
+                            <p style={{ color: "#bfc3c1" }}>
+                                FelisAI PDF is an intelligent assistant that lets you interact with your PDFs like never before. Just upload
+                                a document and ask questions—FelisAI will give you accurate, context-aware answers instantly.
+                                <br /> <br /> Perfect for Students, Researchers, and Professionals Save time and skip the scroll—FelisAI PDF
+                                brings the right answers to you.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="col-lg-6 col-12  p-2">
+                        <div className="fw-medium mt-4 fs-5 pb-2 text-center">
+                            <p style={{ color: "#bfc3c1" }}>
+                                Powered by Retrieval-Augmented Generation
+                                <br />
+                                Combining the power of vector search and language models, FelisAI PDF understands your queries and fetches
+                                precise information from your documents.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-2  d-flex justify-content-center">
+                    <a href="/register" style={{ color: "white", textDecoration: "none" }} className="fw-medium fs-4">
+                        Sign up to use FelisAI PDF
+                    </a>
+                </div>
+            </div>
+            <div style={{ paddingTop: "100px", backgroundColor: "rgb(23, 23, 23)" }} className=" pe-sm-5 ps-sm-5 pe-2 ps-2 pb-2">
                 <p className={`homepage-text`}>FelisAI Cancer</p>
                 <p style={{ color: "#bfc3c1" }} className="fw-medium mt-4 fs-4 pb-2">
                     Discover FelisAI Cancer: Your Source for Accurate Cancer Information
