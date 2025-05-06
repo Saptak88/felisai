@@ -353,6 +353,9 @@ const AskFromPdf = () => {
             )}
 
             <div className="dashboard-main">
+                <div className="d-flex flex-1 justify-content-center">
+                    <p>The first upload may fail because the backend takes time to start, as it is hosted on a free tier.</p>
+                </div>
                 <div className="upload-box me-sm-5 ms-sm-5 me-2 ms-2">
                     <div>
                         {file && (

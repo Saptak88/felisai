@@ -336,6 +336,13 @@ const Dashboard = () => {
                                     FelisAI Cancer
                                 </a>
                             </li>
+                            {userInfo && (
+                                <li>
+                                    <a href="/askfrompdf" className={`chat-history ms-2 fs-5 mb-1 me-2 `}>
+                                        FelisAI PDF
+                                    </a>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
