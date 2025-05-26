@@ -1,23 +1,20 @@
 from fastapi import FastAPI,UploadFile, File, Form
+import fitz 
+import uuid
 from pydantic import BaseModel
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
-from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 import tempfile
 import os
 import re
-os.environ['PINECONE_API_KEY'] = "797c44ef-d4dd-4820-b40f-72df2f1440fe"  # Replace with your actual key
-inference_api_key="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"
+
+pc = Pinecone(api_key="pcsk_51s9aK_LAeBBHAaeUYC5RNbKPQeWD2zoZJb6QjttLNMMx59eP7fmJoPvPLkKYAiuVbKUff")
 
 app = FastAPI()
 
 
 
-embeddings = HuggingFaceInferenceAPIEmbeddings(
-    api_key=inference_api_key, model_name="intfloat/multilingual-e5-small"
-)
-docsearch = PineconeVectorStore(index_name="bengalirag2", embedding=embeddings, namespace="englishcancer")
+index_name = "rag2"
+index = pc.Index(index_name)
 
 @app.get("/")
 def read_root():
@@ -30,26 +27,90 @@ class Query(BaseModel):
 @app.post("/search")
 async def search(query: Query):
     # Perform the similarity search
-    results = docsearch.similarity_search(query.query, k=3)
-    # Create context text from the search results
-    context_text = "\n---\n".join([doc.page_content for doc in results])        
-    return {"context": context_text}
+    results = index.search(
+    namespace="cancer",
+    query={
+        "top_k": 10,
+        "inputs": {
+            'text': query.query
+        }
+    }
+)
+    context_text = []
+
+    # Iterate over the hits and extract the text for each result
+    for hit in results['result']['hits']:
+        # Get the 'text' field from each result's fields
+        text = hit['fields']['text']
+        
+        # Optionally, you can add some formatting here if needed, like:
+        context_text.append(f"Text: {text}\n")
+
+    # Join the text chunks into a single string
+    context_text = "\n\n".join(context_text)
+
+    # Return the combined context as the response
+    return {"context": "context_text"}
 
 @app.post("/search_session")
 async def search_with_session(data: Query):
     # Create a temporary vector store with the requested session's namespace
-    docsearch2 = PineconeVectorStore(
-        index_name="bengalirag2",
-        embedding=embeddings,
-        namespace=data.session_id
-    )
+    results = index.search(
+    namespace=data.session_id,
+    query={
+        "top_k": 10,
+        "inputs": {
+            'text': data.query
+        }
+    }
+)
 
-    # Perform the similarity search
-    results = docsearch2.similarity_search(data.query, k=10)
+    context_text = []
 
-    # Combine results into a single context string
-    context_text = "\n---\n".join([doc.page_content for doc in results])
+    # Iterate over the hits and extract the text for each result
+    for hit in results['result']['hits']:
+        # Get the 'text' field from each result's fields
+        text = hit['fields']['text']
+        
+        # Optionally, you can add some formatting here if needed, like:
+        context_text.append(f"Text: {text}\n")
+
+    # Join the text chunks into a single string
+    context_text = "\n\n".join(context_text)
+
+    # Return the combined context as the response
     return {"context": context_text}
+
+
+def extract_chunks_from_pdf(file_path: str) -> list[dict]:
+    pdf = fitz.open(file_path)
+    records = []
+
+    for page_num, page in enumerate(pdf, start=1):
+        text = page.get_text()
+        text = text.strip().replace("\n", " ")
+
+        chunk_size = 1500
+        overlap = 400
+        start = 0
+        end = chunk_size
+
+        while start < len(text):
+            chunk = text[start:end].strip()
+            if chunk:
+                records.append({
+                    "_id": str(uuid.uuid4()),
+                    "text": chunk,
+                })
+            start += chunk_size - overlap
+            end = start + chunk_size
+
+    return records
+
+def batch_upsert(index, session_id, records, batch_size=80):
+    for i in range(0, len(records), batch_size):
+        batch = records[i:i + batch_size]
+        index.upsert_records(session_id, batch)
 
 @app.post("/upload")
 async def upload_pdf(session_id: str = Form(...), file: UploadFile = File(...)):
@@ -62,31 +123,8 @@ async def upload_pdf(session_id: str = Form(...), file: UploadFile = File(...)):
 
     try:
         # Load and split the document
-        loader = PyPDFLoader(temp_path)
-        documents = loader.load()
-        for doc in documents:
-            # Clean the text (replace newlines and normalize spaces)
-            cleaned_content = doc.page_content.replace("\n", " ").strip()
-            cleaned_content = re.sub(r'\s+', ' ', cleaned_content)  # Replace multiple spaces with single space  
-            # Update the document's content while preserving metadata
-            doc.page_content = cleaned_content
-        
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
-        split_docs = splitter.split_documents(documents)
-
-
-        # for i, doc in enumerate(split_docs):
-        #     print(f"Document {i+1}:")
-        #     print(doc.page_content)  # Printing the content of each split document
-        #     print("-" * 80)
-        # Upload to Pinecone under session_id namespace
-        PineconeVectorStore.from_documents(
-            split_docs,
-            embeddings,
-            index_name="bengalirag2",
-            namespace=session_id
-        )
-
-        return {"message": "PDF uploaded and indexed successfully", "namespace": session_id}
+        records = extract_chunks_from_pdf(temp_path)
+        batch_upsert(index, session_id, records)
+        return {"message": f"Upserted {len(records)} records."}
     finally:
         os.remove(temp_path)

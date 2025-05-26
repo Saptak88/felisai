@@ -148,6 +148,21 @@ const Dashboard2 = () => {
             return;
         }
 
+        //detection
+        const lowerMessage = message.trim().toLowerCase();
+        const cancerSites = {
+            "breast cancer detection": "https://jyotiraditya1706-breast-cancer-detector.hf.space",
+            "oral cancer detection": "https://jyotiraditya1706-oral-cancer-predictor.hf.space",
+            "lung cancer detection": "https://jyotiraditya1706-lung-cancer-detector.hf.space",
+            "colon cancer detection": "https://jyotiraditya1706-lung-cancer-detector.hf.space",
+            "brain cancer detection": " https://jyotiraditya1706-brain-cancer-detection.hf.space",
+        };
+
+        if (cancerSites[lowerMessage]) {
+            window.open(cancerSites[lowerMessage], "_blank");
+            return;
+        }
+        //detection
         // Update state using functional form to ensure correct state update
         const updatedMessages = [...messages, { content: message, role: "user" }];
         setMessages(updatedMessages);
